@@ -1,2 +1,2 @@
-# Python ML Devcontainer
-Devcontainers for python ML projects.
+# Development Containers
+Devcontainers for all projects.
