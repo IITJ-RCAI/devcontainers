@@ -1,0 +1,8 @@
+# common requirements
+
+# Utility
+dataclassy
+
+# ML
+pytorch-lightning==1.2.4    # specific version for mlflow compatability
+mlflow
