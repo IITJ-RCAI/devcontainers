@@ -1,58 +1,125 @@
 # syntax=docker/dockerfile:experimental
 
-# Set base image arg, allowed values: cpu, gpu
-ARG base_arc=cpu
-# Set base image library, allowed values: pytorch, tf
-ARG base_lib=pytorch
-# Non-root user
-ARG USERNAME=vscode
-ARG USER_UID=1000
-ARG USER_GID=$USER_UID
+# Set image arg
+# 'image' should point to a .yml file or a folder containing multiple .yml files.
+# ARG image='images/default.yml'
+ARG PASSWORD='mamba'
 
+# =================
+# Base env image
+# =================
+# Use micromamba image
+FROM mambaorg/micromamba:latest as base
+ARG PASSWORD
 
-# See: https://cloud.google.com/deep-learning-containers/docs/choosing-container
-FROM gcr.io/deeplearning-platform-release/${base_lib}-${base_arc} as base
-# Add google apt gpg key
-# See: https://groups.google.com/g/gce-discussion/c/zeGb4gdK2Iw
-RUN curl https://packages.cloud.google.com/apt/doc/apt-key.gpg | apt-key add -
-# See: https://code.visualstudio.com/docs/remote/containers-advanced#_creating-a-nonroot-user
-# Non-root user
-ARG USERNAME
-ARG USER_UID
-ARG USER_GID
+# Remove .bashrc interactive session check
+RUN sed -i '4,9d' ~/.bashrc
+
+# Update user password
+USER root
+RUN echo micromamba:${PASSWORD} | chpasswd
+USER micromamba
+
+# Enable man docs
+# https://unix.stackexchange.com/a/480460
+USER root
+RUN sed -i '/path-exclude \/usr\/share\/man/d' /etc/dpkg/dpkg.cfg.d/docker \
+    && sed -i '/path-exclude \/usr\/share\/groff/d' /etc/dpkg/dpkg.cfg.d/docker
+USER micromamba
+
+# Install ssh server and other apt packages
+USER root
+RUN apt-get update \
+    && apt-get install -y man less openssh-server gnupg curl wget git \
+    && ssh-keygen -A \
+    && chmod -R ugo+r /etc/ssh/*
+EXPOSE 22
+ENTRYPOINT ["/usr/sbin/sshd","-D"]
+USER micromamba
+
+# Install tmux terminal
+# https://unix.stackexchange.com/questions/479/keep-processes-running-after-ssh-session-disconnects
+USER root
+RUN apt-get update \
+    && apt-get install -y tmux
+USER micromamba
+# Install tmux config
+RUN cd /tmp \
+    && git clone https://github.com/samoshkin/tmux-config.git \
+    && ./tmux-config/install.sh
+
+# Install supervisor
+USER root
+COPY --from=ochinchina/supervisord:latest /usr/local/bin/supervisord /usr/bin/supervisord
+# RUN apt-get update \
+#     && apt-get install -y supervisor \
+RUN chmod -R ugo+rw /var/*
+COPY scripts/supervisor.conf /etc/supervisor/supervisord.conf
+ENTRYPOINT ["/usr/bin/supervisord"]
+USER micromamba
+
 # Rename the user
-RUN usermod -l $USERNAME jupyter \
-    # Update home links
-    && usermod -d /home/$USERNAME -m $USERNAME \
-    && mkdir /home/jupyter \
-    # [Optional] Add sudo support. Omit if you don't need to install software after connecting.
-    && apt-get update \
-    && apt-get install -y sudo \
-    && echo $USERNAME ALL=\(root\) NOPASSWD:ALL > /etc/sudoers.d/$USERNAME \
-    && chmod 0440 /etc/sudoers.d/$USERNAME
-# [Optional] Set the default user. Omit if you want to keep the default as root.
-USER $USERNAME
-# See: https://stackoverflow.com/a/61751745/10027894
-# Keeps Python from generating .pyc files in the container
-ENV PYTHONDONTWRITEBYTECODE=1 \
-    # Turns off buffering for easier container logging
-    PYTHONUNBUFFERED=1 \
-    # pip
-    # PIP_NO_CACHE_DIR=off \
-    PIP_DISABLE_PIP_VERSION_CHECK=on \
-    # google container disable root
-    NOTEBOOK_DISABLE_ROOT=1
-# Local pip path
-RUN mkdir -p /home/$USERNAME/.local/bin
-ENV PATH="${PATH}:/home/$USERNAME/.local/bin"
+# RUN usermod -l $USERNAME micromamba \
+#     # Update home links
+#     && usermod -d /home/$USERNAME -m $USERNAME
 
+# Install Powershell
+# USER root
+# RUN apt-get update \
+#     && apt-get install -y curl gnupg apt-transport-https \
+#     && curl https://packages.microsoft.com/keys/microsoft.asc | apt-key add - \
+#     && sh -c 'echo "deb [arch=amd64] https://packages.microsoft.com/repos/microsoft-debian-stretch-prod stretch main" > /etc/apt/sources.list.d/microsoft.list' \
+#     && apt-get update \
+#     && apt-get install -y powershell
+# USER micromamba
 
-# Define image with common pip packages
-FROM base as common
-# Copy requirements.txt
-COPY common/requirements.txt requirements.txt
-# Install pip packages
-RUN --mount=type=cache,target=/home/$USERNAME/.cache \
-    pip install -r requirements.txt
-# Save pip freeze as artifact
-RUN pip list --format=freeze | sudo tee /pip-freeze.txt > /dev/null
+# [Optional] Add sudo support. Omit if you don't need to install software after connecting.
+# USER root
+# RUN apt-get install -y sudo \
+#     && echo micromamba ALL=\(root\) NOPASSWD:ALL > /etc/sudoers.d/micromamba \
+#     && chmod 0440 /etc/sudoers.d/micromamba
+# USER micromamba
+
+# Permanently disable apt
+USER root
+RUN apt-get clean autoclean &&\
+    apt-get autoremove --yes &&\
+    rm -rf /var/lib/{apt,dpkg,cache,log}/
+USER micromamba
+
+# Copy scripts to image
+COPY scripts /scripts
+USER root
+RUN chmod -R a+rwX /scripts/*
+USER micromamba
+
+# Init. micromamba shell
+RUN micromamba shell init -s bash -p /home/micromamba/micromamba
+SHELL ["/bin/bash", "-c"]
+
+# ====================
+# Install envs in image
+# ====================
+# ARG image
+
+# # Copy image specs
+# COPY ${image} /images/${image}
+
+# # Install conda envs
+# # TODO: Use dynamic userid values here
+# RUN --mount=type=cache,target=/home/micromamba/micromamba/pkgs,uid=1000,gid=1000 \
+#     source ~/.bashrc \
+#     # Iterate over all .yml files recursively
+#     && for file in /images/**/*;\
+#         do \
+#         NAME=$(grep -Pio '^name: *\K.*' "$file" | head -1); \
+#         # If name is 'base' then update base else create new environment
+#             if [[ $NAME == base ]]; \
+#             then \
+#                 micromamba install -y -n base -f "$file"; \
+#             else \
+#                 micromamba create -f "$file"; \
+#             fi \
+#         done \
+#         # Log everything to ~/env_install.log
+#         2>&1 | tee ~/env_install.log
