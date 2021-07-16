@@ -16,6 +16,7 @@ finish() {
 }
 trap finish SIGINT SIGTERM
 
+echo "AFK timer started."
 while :
 do
     # Check active ssh sessions
