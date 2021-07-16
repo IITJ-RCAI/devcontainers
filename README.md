@@ -30,3 +30,13 @@ The `/scripts` folder contains utility scripts to controll the behaviour of the 
 |:-:|:-|
 |`shutdown.sh`|Shuts down the container.|
 |`afktimer.sh <on/off>`|Turns the afk timer on/off. Turn it off when you have a long runnnung task that needs to persist after you disconnect `ssh`.|
+
+The container respects the following runtime environment variables,
+
+|Env. Var.|Usage|
+|:-|:-|
+|`SSHD_DEBUG`|If present, the `sshd` process runs in debug mode.|
+|`AFK_TIMER_DISABLES`|If present, disables the afk timer on start, else enables it.|
+|`AFK_TIMEOUT_SECONDS` [default:300]|The number of seconds of AFK after which the container exits.|
+|`AFK_CHECK_INTERVAL_SECONDS` [default:60]|The internal poling interval of the AFK timer.|
+

@@ -1,8 +1,8 @@
 #!/bin/bash
 
 # Take arguments, in seconds
-TIMEOUT=${1:-300}
-CHECK_INTERVAL=${2:-60}
+TIMEOUT=${AFK_TIMEOUT_SECONDS:-300}
+CHECK_INTERVAL=${AFK_CHECK_INTERVAL_SECONDS:-60}
 
 # https://stackoverflow.com/a/53122736/10027894
 __dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
