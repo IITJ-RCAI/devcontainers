@@ -27,10 +27,23 @@ RUN sed -i '/path-exclude \/usr\/share\/man/d' /etc/dpkg/dpkg.cfg.d/docker \
     && sed -i '/path-exclude \/usr\/share\/groff/d' /etc/dpkg/dpkg.cfg.d/docker
 USER micromamba
 
+# Install apt packages
+USER root
+RUN apt-get update \
+    && apt-get install -y \
+    build-essential \
+    man \
+    less \
+    gnupg \
+    curl \
+    wget \
+    git
+USER micromamba
+
 # Install ssh server and other apt packages
 USER root
 RUN apt-get update \
-    && apt-get install -y man less openssh-server gnupg curl wget git
+    && apt-get install -y openssh-server
 RUN mkdir -p /var/run/sshd \
     && mkdir -p /run/sshd
 RUN ssh-keygen -A
@@ -80,17 +93,16 @@ USER micromamba
 #     && chmod 0440 /etc/sudoers.d/micromamba
 # USER micromamba
 
-# Permanently disable apt
+# Clear apt cache
 USER root
-RUN apt-get clean autoclean &&\
-    apt-get autoremove --yes &&\
-    rm -rf /var/lib/{apt,dpkg,cache,log}/
+RUN apt-get clean autoclean \
+    && apt-get autoremove --yes
+    # rm -rf /var/lib/{apt,dpkg,cache,log}/
 USER micromamba
 
 # Copy scripts to image
 USER root
 COPY scripts /scripts
-USER root
 RUN chmod -R a+rwx /scripts/*
 USER micromamba
 
