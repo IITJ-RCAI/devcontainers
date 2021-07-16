@@ -2,13 +2,13 @@
 name: build-devcontainers
 
 on:
-  workflow_dispatch:
   push:
     branches:
       - 'master'
     paths-ignore:
       - '.gitignore'
       - 'README.md'
+  workflow_dispatch:
 
 jobs:
   docker:
