@@ -2,7 +2,7 @@
 name: build-devcontainers
 
 on:
-  workflow_dispatch:
+  workflow_dispatch
   push:
     branches:
       - 'master'
