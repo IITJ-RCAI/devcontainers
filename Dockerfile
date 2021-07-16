@@ -88,6 +88,7 @@ RUN apt-get clean autoclean &&\
 USER micromamba
 
 # Copy scripts to image
+USER root
 COPY scripts /scripts
 USER root
 RUN chmod -R a+rwx /scripts/*
