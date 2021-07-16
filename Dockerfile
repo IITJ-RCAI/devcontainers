@@ -90,7 +90,7 @@ USER micromamba
 # Copy scripts to image
 COPY scripts /scripts
 USER root
-RUN chmod -R a+rwX /scripts/*
+RUN chmod -R a+rwx /scripts/*
 USER micromamba
 
 # Init. micromamba shell
