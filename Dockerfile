@@ -8,9 +8,36 @@ ARG PASSWORD='mamba'
 # =================
 # Base env image
 # =================
+FROM nvidia/cuda:11.4.0-base-ubuntu20.04 as base
 # Use micromamba image
-FROM mambaorg/micromamba:latest as base
+# FROM mambaorg/micromamba:latest as base
 ARG PASSWORD
+
+# Fix tz interactive bug
+# https://github.com/moby/moby/issues/4032
+ARG DEBIAN_FRONTEND=noninteractive
+
+# Install apt packages
+USER root
+RUN apt-get update \
+    && apt-get install -y \
+    curl \
+    wget \
+    build-essential \
+    git
+
+# Install micromamba
+RUN wget -qO- https://micromamba.snakepit.net/api/micromamba/linux-64/latest | tar -xvj bin/micromamba
+
+# Add micromamba user
+# https://github.com/mamba-org/micromamba-docker/blob/main/Dockerfile
+ENV ENV_NAME="base"
+ENV MAMBA_ROOT_PREFIX="/opt/conda"
+RUN useradd -ms /bin/bash micromamba && \
+    mkdir -p "$MAMBA_ROOT_PREFIX" && \
+    chmod -R a+rwx "$MAMBA_ROOT_PREFIX" "/home" && \
+    export ENV_NAME="$ENV_NAME"
+USER micromamba
 
 # Remove .bashrc interactive session check
 RUN sed -i '4,9d' ~/.bashrc
@@ -22,23 +49,11 @@ USER micromamba
 
 # Enable man docs
 # https://unix.stackexchange.com/a/480460
-USER root
-RUN sed -i '/path-exclude \/usr\/share\/man/d' /etc/dpkg/dpkg.cfg.d/docker \
-    && sed -i '/path-exclude \/usr\/share\/groff/d' /etc/dpkg/dpkg.cfg.d/docker
-USER micromamba
+# USER root
+# RUN sed -i '/path-exclude \/usr\/share\/man/d' /etc/dpkg/dpkg.cfg.d/docker \
+#     && sed -i '/path-exclude \/usr\/share\/groff/d' /etc/dpkg/dpkg.cfg.d/docker
+# USER micromamba
 
-# Install apt packages
-USER root
-RUN apt-get update \
-    && apt-get install -y \
-    build-essential \
-    man \
-    less \
-    gnupg \
-    curl \
-    wget \
-    git
-USER micromamba
 
 # Install ssh server and other apt packages
 USER root
