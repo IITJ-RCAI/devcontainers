@@ -30,11 +30,12 @@ USER micromamba
 # Install ssh server and other apt packages
 USER root
 RUN apt-get update \
-    && apt-get install -y man less openssh-server gnupg curl wget git \
-    && ssh-keygen -A \
-    && chmod -R ugo+r /etc/ssh/*
+    && apt-get install -y man less openssh-server gnupg curl wget git
+RUN mkdir -p /var/run/sshd \
+    && mkdir -p /run/sshd
+RUN ssh-keygen -A
+    # && chmod -R ugo+r /etc/ssh/*
 EXPOSE 22
-ENTRYPOINT ["/usr/sbin/sshd","-D"]
 USER micromamba
 
 # Install tmux terminal
@@ -53,9 +54,8 @@ USER root
 COPY --from=ochinchina/supervisord:latest /usr/local/bin/supervisord /usr/bin/supervisord
 # RUN apt-get update \
 #     && apt-get install -y supervisor \
-RUN chmod -R ugo+rw /var/*
+# RUN chmod -R ugo+rw /var/*
 COPY scripts/supervisor.conf /etc/supervisor/supervisord.conf
-ENTRYPOINT ["/usr/bin/supervisord"]
 USER micromamba
 
 # Rename the user
@@ -97,6 +97,11 @@ USER micromamba
 # Init. micromamba shell
 RUN micromamba shell init -s bash -p /home/micromamba/micromamba
 SHELL ["/bin/bash", "-c"]
+
+# Set entrypoint
+ENTRYPOINT [ "/scripts/internal/entrypoint.sh" ]
+# Set root as final user to fix permisions
+USER root
 
 # ====================
 # Install envs in image

@@ -20,8 +20,8 @@ echo "AFK timer started."
 while :
 do
     # Check active ssh sessions
-    COUNT=$(pgrep -aic sshd)
-    if [[ $COUNT == 1 ]]
+    COUNT=$(pgrep -afic "sshd: micromamba@")
+    if [[ $COUNT == 0 ]]
     then
         # Check if elapsed time greater than timeout
         # https://unix.stackexchange.com/a/314372
