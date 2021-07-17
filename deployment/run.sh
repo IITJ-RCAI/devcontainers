@@ -13,12 +13,13 @@ fi
 read -p "Would you like to create a new devcontainer?[Y/n]: " IS_NEW_CONTAINER
 if [ -z $IS_NEW_CONTAINER ] || [ $IS_NEW_CONTAINER = 'y' ] || [ $IS_NEW_CONTAINER = 'Y']
 then
-    ssh $DGX_USER@$DGX_IP -t 'source <(curl -s https://raw.githubusercontent.com/IITJ-RCAI/devcontainers/main/deployment/run_devcontainer.sh)'
+    # TODO: Fix super specific kubeconfig workaround.
+    ssh $DGX_USER@$DGX_IP -t "KUBECONFIG=/home/${DGX_USER}/.k8s-authentication/${DGX_USER}.config source <(curl -s https://raw.githubusercontent.com/IITJ-RCAI/devcontainers/main/deployment/run_devcontainer.sh)"
 fi
 
 echo "Building ssh tunnel..."
 echo "
-This terminal will now serves as a tunnel proxy to the DGX server.
+This terminal will now serve as a tunnel proxy to the DGX server.
 Please login to ssh once again at the prompt.
 Do not close this terminal untill you are working. If you end up closing this terminal, you can re-run this script and specify 'n' at the create new devcontainer prompt.
 
