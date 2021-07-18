@@ -52,7 +52,18 @@ spec:
           mountPath: /workspace/storage
         - name: home
           mountPath: /home
+        # Shared memory hack
+        # https://stackoverflow.com/a/46434614/10027894
+        - mountPath: /dev/shm
+          name: dshm
       volumes:
+      # Shared memory hack
+      # https://stackoverflow.com/a/46434614/10027894
+      # https://github.com/kubernetes/kubernetes/pull/63641
+      - name: dshm
+        emptyDir:
+          sizeLimit: "350Mi"
+          medium: Memory
       - name: data
         hostPath:
           path: /raid/$(whoami)
