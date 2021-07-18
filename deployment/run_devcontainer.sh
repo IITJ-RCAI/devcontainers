@@ -6,12 +6,11 @@ then
 fi
 name=${name,,}
 
-read -p "Enter devcontainer token/password (lower case)[<generated>]: " token
-if [ -z "$token" ]
+read -p "Enter devcontainer token/password [<generated>]: " TOKEN
+if [ -z "$TOKEN" ]
 then 
-    token="<generated>"
+    TOKEN="<generated>"
 fi
-token=${token,,}
 
 read -p "Enter number of GPUs (0/1/2)[0]: " gpus
 gpus=${gpus:-0}
@@ -96,14 +95,13 @@ done
 
 POD_IP=$(kubectl get pods --selector=job-name=devcontainer-$name --output=jsonpath='{.items[-1].status.podIP}')
 
-TOKEN=$(kubectl logs $POD_NAME | sed -nE 's/http:\/\/localhost:80.0\/\?token=//p')
-while [ -z $TOKEN ]
+while [ $TOKEN = "<generated>" ]
 do
   echo "Waiting for pod to start..."
   sleep 5
   TOKEN=$(kubectl logs $POD_NAME | sed -nE 's/ *http:\/\/localhost:80.0\/\?token=//p')
+  TOKEN=${${TOKEN##+( )}%%+( )}
 done
-TOKEN=${${TOKEN##+( )}%%+( )}
 
 echo "Devcontainer running in pod '$POD_NAME' at ip: $POD_IP"
 echo "Connect at: https://${POD_IP}:8080/?token=$TOKEN"
