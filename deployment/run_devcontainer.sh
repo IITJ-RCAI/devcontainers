@@ -6,6 +6,13 @@ then
 fi
 name=${name,,}
 
+read -p "Enter devcontainer token/password (lower case)[<generated>]: " token
+if [ -z "$token" ]
+then 
+    token="<generated>"
+fi
+token=${token,,}
+
 read -p "Enter number of GPUs (0/1/2)[0]: " gpus
 gpus=${gpus:-0}
 if ! [[ "$gpus" =~ ^[0-2]$ ]]
@@ -32,9 +39,9 @@ spec:
           - name: SHUTDOWN_INACTIVE_KERNELS
             value: "true"
           - name: AUTHENTICATE_VIA_JUPYTER
-            value: "<generated>"
-          - name: WORKSPACE_SSL_ENABLED
-            value: "true"
+            value: "${token}"
+#           - name: WORKSPACE_SSL_ENABLED
+#             value: "true"
         resources:
           limits:
             nvidia.com/gpu: "$gpus"
