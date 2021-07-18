@@ -12,7 +12,7 @@ To use run the following command,
 
 Please shutdown the devcontainer when your work with it is done.
 
-To shutdown, use the following command in the terminal,
+To shutdown, use the following command in the terminal inside the devcontainer,
 
 `supervisorctl shutdown`
 
