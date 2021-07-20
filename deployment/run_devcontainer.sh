@@ -23,6 +23,18 @@ fi
 mkdir -p $HOME/.devcontainer/${name}
 
 cat <<EOF >$HOME/.devcontainer/${name}/kubectl.yaml
+apiVersion: v1
+kind: Secret
+metadata:
+  name: devcontainer-tls
+type: kubernetes.io/tls
+data:
+  # the data is abbreviated in this example
+  tls.crt: |
+        $(curl -s https://raw.githubusercontent.com/IITJ-RCAI/devcontainers/main/deployment/cert/devcontainer.crt)
+  tls.key: |
+        $(curl -s https://raw.githubusercontent.com/IITJ-RCAI/devcontainers/main/deployment/cert/devcontainer.key)
+---
 apiVersion: batch/v1
 kind: Job
 metadata:
@@ -55,7 +67,15 @@ spec:
         # https://stackoverflow.com/a/46434614/10027894
         - mountPath: /dev/shm
           name: dshm
+        # TLS keys mount
+        - name: tls
+          mountPath: "/resources/ssl"
+          readOnly: true
       volumes:
+      # TLS keys
+      - name: tls
+        secret:
+          secretName: devcontainer-tls
       # Shared memory hack
       # https://stackoverflow.com/a/46434614/10027894
       # https://github.com/kubernetes/kubernetes/pull/63641
