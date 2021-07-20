@@ -39,8 +39,8 @@ spec:
             value: "true"
           - name: AUTHENTICATE_VIA_JUPYTER
             value: "${token}"
-#           - name: WORKSPACE_SSL_ENABLED
-#             value: "true"
+          - name: WORKSPACE_SSL_ENABLED
+            value: "true"
         resources:
           limits:
             nvidia.com/gpu: "$gpus"
