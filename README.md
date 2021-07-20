@@ -18,7 +18,7 @@ To shutdown, use the following command in the terminal inside the devcontainer,
 
 > Note that shutting down the container doesn't delete the Kubectl Job.
 
-## Enabling HTTPS'
+## Enabling HTTPS
 
 To enable trusted HTTPS you need to install the roo CA certificate in your computer,
 - Download [rootCS.pem](/deployment/cert/rootCA.pem)
