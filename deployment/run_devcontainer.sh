@@ -129,6 +129,10 @@ spec:
             value: "${token}"
           - name: WORKSPACE_SSL_ENABLED
             value: "true"
+          - name: SERVICE_URL
+            value: "https://open-vsx.org/vscode/gallery"
+          - name: ITEM_URL
+            value: "https://open-vsx.org/vscode/item"
         resources:
           limits:
             nvidia.com/gpu: "$gpus"
