@@ -129,6 +129,10 @@ spec:
             value: "${token}"
           - name: WORKSPACE_SSL_ENABLED
             value: "true"
+          - name: SERVICE_URL
+            value: "https://marketplace.visualstudio.com/_apis/public/gallery"
+          - name: ITEM_URL
+            value: "https://marketplace.visualstudio.com/items"
         resources:
           limits:
             nvidia.com/gpu: "$gpus"
