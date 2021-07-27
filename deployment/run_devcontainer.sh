@@ -137,6 +137,9 @@ spec:
           mountPath: /workspace/data
         - name: nfs
           mountPath: /workspace/storage
+        - name: nfs
+          mountPath: /workspace/.workspace
+          subPath: .workspace
         - name: home
           mountPath: /home
         # Shared memory hack
