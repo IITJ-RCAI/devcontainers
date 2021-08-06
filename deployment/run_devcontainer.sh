@@ -124,7 +124,9 @@ spec:
         # imagePullPolicy: Always
         env:
           - name: SHUTDOWN_INACTIVE_KERNELS
-            value: "true"
+            value: "7200"
+          - name: TENSORBOARD_PROXY_URL
+            value: "/tools/%PORT%/"
           - name: AUTHENTICATE_VIA_JUPYTER
             value: "${token}"
           - name: WORKSPACE_SSL_ENABLED
