@@ -141,11 +141,11 @@ spec:
         volumeMounts:
         - name: data
           mountPath: /workspace/data
-        - name: nfs
-          mountPath: /workspace/storage
-        - name: nfs
+        - name: data
           mountPath: /workspace/.workspace
           subPath: .workspace
+        - name: nfs
+          mountPath: /workspace/storage
         - name: home
           mountPath: /home
         # Shared memory hack
