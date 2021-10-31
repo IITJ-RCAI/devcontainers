@@ -118,9 +118,13 @@ metadata:
 spec:
   template:
     spec:
+      dnsConfig:
+        nameservers:
+          - 1.1.1.1
+          - 8.8.8.8
       containers:
       - name: $(whoami)-$name
-        image: mltooling/ml-workspace-gpu:latest
+        image: mltooling/ml-workspace-gpu:0.13.2
         # imagePullPolicy: Always
         env:
           - name: SHUTDOWN_INACTIVE_KERNELS
