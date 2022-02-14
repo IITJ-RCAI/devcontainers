@@ -6,11 +6,15 @@ Powered by,
 
 To use run the following command,
 
-`bash -c "source <(curl -s https://raw.githubusercontent.com/IITJ-RCAI/devcontainers/main/deployment/run.sh)"`
+```sh
+bash -c "source <(curl -s https://raw.githubusercontent.com/IITJ-RCAI/devcontainers/main/deployment/run.sh)"
+```
 
 To run from kubectl host run,
 
-`bash -c "source <(curl -s https://raw.githubusercontent.com/IITJ-RCAI/devcontainers/main/deployment/run_devcontainer.sh)"`
+```sh
+bash -c "source <(curl -s https://raw.githubusercontent.com/IITJ-RCAI/devcontainers/main/deployment/run_devcontainer.sh)"
+```
 
 ## Shutdown
 
@@ -18,7 +22,9 @@ Please shutdown the devcontainer when your work with it is done.
 
 To shutdown, use the following command in the terminal inside the devcontainer,
 
-`supervisorctl shutdown`
+```
+supervisorctl shutdown
+```
 
 > Note that shutting down the container doesn't delete the Kubectl Job.
 
