@@ -251,6 +251,8 @@ spec:
           - name: ITEM_URL
             value: "https://open-vsx.org/vscode/item"
         resources:
+          requests:
+            ephemeral-storage: 2Gi
           limits:
             nvidia.com/gpu: "$gpus"
         volumeMounts:
@@ -259,6 +261,9 @@ spec:
         - name: data
           mountPath: /workspace/.workspace
           subPath: .workspace
+        - name: data
+          mountPath: /opt/conda/pkgs
+          subPath: .conda_pkgs
         - name: nfs
           mountPath: /workspace/storage
         - name: home
