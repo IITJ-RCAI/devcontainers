@@ -252,7 +252,7 @@ spec:
             value: "https://open-vsx.org/vscode/item"
         resources:
           requests:
-            ephemeral-storage: 2Gi
+            ephemeral-storage: 30Gi
           limits:
             nvidia.com/gpu: "$gpus"
         volumeMounts:
